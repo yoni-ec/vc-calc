@@ -258,7 +258,48 @@ table.ctbl .sc-hdr td{background:var(--bg3);font-size:10px;color:var(--text3);le
     </div>
   </div>
 
-  <div class="slabel">Shared assumptions</div>
+  <div class="slabel">Portfolio construction</div>
+  <div class="card">
+    <div class="g3">
+      <div class="field">
+        <label># of core checks</label>
+        <div class="frow"><input type="range" id="cN" min="1" max="30" step="1" value="12"><input type="number" class="nb" id="cNN" value="12"></div>
+        <div class="hint live" id="cNHint">Core budget: $48M</div>
+      </div>
+      <div class="field">
+        <label># of small checks</label>
+        <div class="frow"><input type="range" id="sNcheck" min="0" max="80" step="1" value="12"><input type="number" class="nb" id="sNcheckN" value="12"></div>
+        <div class="hint live" id="sNHint">Small budget: $12M</div>
+      </div>
+      <div class="field">
+        <label>Reserve ($M)</label>
+        <div class="frow"><input type="range" id="mixRes" min="0" max="100" step="1" value="40"><input type="number" class="nb" id="mixResN" value="40"></div>
+        <div class="hint">For pro-rata follow-ons</div>
+      </div>
+    </div>
+    <!-- live allocation tracker -->
+    <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border)">
+      <div style="height:10px;border-radius:5px;overflow:hidden;display:flex;background:var(--bg3);margin-bottom:6px">
+        <div id="alloc-core-seg" style="height:100%;background:#185FA5;transition:width 0.15s;width:48%"></div>
+        <div id="alloc-small-seg" style="height:100%;background:#3B6D11;transition:width 0.15s;width:12%"></div>
+        <div id="alloc-res-seg" style="height:100%;background:#BA7517;transition:width 0.15s;width:40%"></div>
+        <div id="alloc-remain-seg" style="height:100%;background:var(--border);transition:width 0.15s;flex:1"></div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">
+        <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)"><span style="width:7px;height:7px;border-radius:2px;background:#185FA5;display:inline-block"></span><span id="leg-core-alloc">Core: $48M</span></span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)"><span style="width:7px;height:7px;border-radius:2px;background:#3B6D11;display:inline-block"></span><span id="leg-small-alloc">Small: $12M</span></span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)"><span style="width:7px;height:7px;border-radius:2px;background:#BA7517;display:inline-block"></span><span id="leg-res-alloc">Reserve: $40M</span></span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:11px"><span style="width:7px;height:7px;border-radius:2px;background:var(--border);display:inline-block"></span><span id="leg-remain-alloc" style="color:var(--text2)">Remaining: $0M</span></span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-size:12px;color:var(--text2)">Total deployed:</span>
+        <span style="font-family:'DM Mono',monospace;font-size:18px;font-weight:500" id="totalDeployed">$100M</span>
+        <span style="font-size:12px" id="deployedStatus" style="color:var(--text2)">of $100M investable</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="slabel">Check sizes &amp; valuations</div>
   <div class="card">
     <div class="g3">
       <div class="field">
@@ -384,7 +425,7 @@ function getFUND(){
   return Math.max(1,fund-fund*fee/100*life);
 }
 
-const sliders=[['fundSize','fundSizeN'],['mgmtFee','mgmtFeeN'],['fundLife','fundLifeN'],['cS','cSN'],['cVal','cValN'],['cDil','cDilN'],['sS','sSN'],['sVal','sValN'],['sDil','sDilN'],['cMed','cMedN'],['sMed','sMedN'],['foVal','foValN'],['foRate','foRateN'],['foExitRate','foExitRateN']];
+const sliders=[['fundSize','fundSizeN'],['mgmtFee','mgmtFeeN'],['fundLife','fundLifeN'],['cN','cNN'],['sNcheck','sNcheckN'],['mixRes','mixResN'],['cS','cSN'],['cVal','cValN'],['cDil','cDilN'],['sS','sSN'],['sVal','sValN'],['sDil','sDilN'],['cMed','cMedN'],['sMed','sMedN'],['foVal','foValN'],['foRate','foRateN'],['foExitRate','foExitRateN']];
 sliders.forEach(([r,n])=>{
   const re=document.getElementById(r),ne=document.getElementById(n);
   if(!re||!ne) return;
@@ -412,6 +453,37 @@ function updateHints(){
   const cS=gv('cS'),cVal=gv('cVal'),cDil=gv('cDil'),cMed=gv('cMed');
   const sS=gv('sS'),sVal=gv('sVal'),sDil=gv('sDil'),sMed=gv('sMed');
   const foVal=gv('foVal'),foRate=gv('foRate');
+  const cNv=gv('cN'),sNv=gv('sNcheck'),mixResV=gv('mixRes');
+
+  // allocation tracker
+  const coreSpend=cNv*cS, smallSpend=sNv*sS;
+  const deployed=coreSpend+smallSpend+mixResV;
+  const remaining=FUND-deployed;
+  const over=remaining<0;
+  const denom=Math.max(deployed,FUND);
+  document.getElementById('alloc-core-seg').style.width=(coreSpend/denom*100)+'%';
+  document.getElementById('alloc-small-seg').style.width=(smallSpend/denom*100)+'%';
+  document.getElementById('alloc-res-seg').style.width=(mixResV/denom*100)+'%';
+  document.getElementById('alloc-remain-seg').style.width=over?'0%':(remaining/denom*100)+'%';
+  document.getElementById('leg-core-alloc').textContent='Core: '+fmt(coreSpend);
+  document.getElementById('leg-small-alloc').textContent='Small: '+fmt(smallSpend);
+  document.getElementById('leg-res-alloc').textContent='Reserve: '+fmt(mixResV);
+  const remEl=document.getElementById('leg-remain-alloc');
+  const statusEl=document.getElementById('deployedStatus');
+  if(over){
+    remEl.textContent='Over-allocated: -'+fmt(Math.abs(remaining));
+    remEl.style.color='#A32D2D';
+    statusEl.textContent='of '+fmt(FUND)+' investable — OVER by '+fmt(Math.abs(remaining));
+    statusEl.style.color='#A32D2D';
+  } else {
+    remEl.textContent='Remaining: '+fmt(remaining);
+    remEl.style.color='var(--text2)';
+    statusEl.textContent='of '+fmt(FUND)+' investable';
+    statusEl.style.color='var(--text2)';
+  }
+  document.getElementById('totalDeployed').textContent=fmt(deployed);
+  document.getElementById('cNHint').textContent='Core budget: '+fmt(coreSpend);
+  document.getElementById('sNHint').textContent='Small budget: '+fmt(smallSpend);
   const cOwn=cS/cVal*100, sOwn=sS/sVal*100;
   document.getElementById('cOwnHint').textContent='Ownership: '+cOwn.toFixed(1)+'%';
   document.getElementById('sOwnHint').textContent='Ownership: '+sOwn.toFixed(1)+'%';
@@ -426,7 +498,7 @@ function updateHints(){
   const scoutSN=Math.floor(FUND/(sS+foRate/100*topUp));
   const scoutInitial=scoutSN*sS, scoutRes=FUND-scoutInitial;
   const expectedFO=Math.round(scoutSN*foRate/100);
-  const mixedSN=Math.max(0,Math.round((FUND-40-12*cS)/sS));
+  const mixedCN=gv('cN'),mixedSN=gv('sNcheck'),mixedRes=gv('mixRes');
   const cN_pure=Math.floor(FUND/cS);
 
   document.getElementById('stratPreview').innerHTML=[
@@ -436,10 +508,10 @@ function updateHints(){
       ['Ownership per check',cOwn.toFixed(1)+'%'],
       ['Exit ownership',+(cOwn*(1-cDil/100)).toFixed(1)+'%'],
     ]},
-    {name:'B · Mixed portfolio',col:'#378ADD',bar:[12*cS,mixedSN*sS,40],rows:[
-      ['Core',`12 × ${fmt(cS)} @ ${fmt(cVal)}`],
+    {name:'B · Mixed portfolio',col:'#378ADD',bar:[mixedCN*cS,mixedSN*sS,mixedRes],rows:[
+      ['Core',`${mixedCN} × ${fmt(cS)} @ ${fmt(cVal)}`],
       ['Small',`${mixedSN} × ${fmt(sS)} @ ${fmt(sVal)}`],
-      ['Reserve (pro-rata)','$40M'],
+      ['Reserve (pro-rata)',fmt(mixedRes)],
       ['Core / small ownership',cOwn.toFixed(1)+'% / '+sOwn.toFixed(1)+'%'],
     ]},
     {name:'C · Scout + convert',col:'#BA7517',bar:[scoutInitial,0,scoutRes],rows:[
@@ -476,7 +548,7 @@ function simMixed(cP,sP,N){
   const FUND=getFUND();
   const cS=gv('cS'),cVal=gv('cVal'),cDil=gv('cDil')/100,cMed=gv('cMed'),cSig=gv('cSig');
   const sS=gv('sS'),sVal=gv('sVal'),sDil=gv('sDil')/100,sMed=gv('sMed'),sSig=gv('sSig');
-  const mixedCN=12,mixedRes=40,mixedSN=Math.max(0,Math.round((FUND-mixedRes-mixedCN*cS)/sS));
+  const mixedCN=gv('cN'),mixedSN=gv('sNcheck'),mixedRes=gv('mixRes');
   const cOwn=cS/cVal,sOwn=sS/sVal;
   const foC=mixedRes*0.5/Math.max(1,mixedCN*cP),foS=mixedRes*0.5/Math.max(1,mixedSN*sP);
   const out=[];
@@ -546,10 +618,10 @@ document.getElementById('runBtn').addEventListener('click',async()=>{
   const cS=gv('cS'),cVal=gv('cVal'),sS=gv('sS'),sVal=gv('sVal'),foVal=gv('foVal'),foRate=gv('foRate')/100;
   const topUp=Math.max(0,cS-sS);
   const scoutSN=Math.floor(FUND/(sS+foRate*topUp));
-  const mixedSN=Math.max(0,Math.round((FUND-40-12*cS)/sS));
+  const mixedCN=gv('cN'),mixedSN=gv('sNcheck'),mixedRes=gv('mixRes');
   const extras={
     A:`${Math.floor(FUND/cS)} checks · $${cVal}M entry val · ${(cS/cVal*100).toFixed(1)}% ownership`,
-    B:`12 core @ $${cVal}M + ${mixedSN} small @ $${sVal}M + $40M reserve`,
+    B:`${mixedCN} core @ $${cVal}M + ${mixedSN} small @ $${sVal}M + ${fmt(mixedRes)} reserve`,
     C:`${scoutSN} scouts @ $${sVal}M · ${Math.round(scoutSN*foRate)} convert @ $${foVal}M`,
   };
 
