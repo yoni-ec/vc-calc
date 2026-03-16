@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VC Portfolio Strategy — Scout vs Core</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f6f2;
+  --bg2:#ffffff;
+  --bg3:#f0efe9;
+  --text:#1a1a16;
+  --text2:#6b6b62;
+  --text3:#9a9a90;
+  --border:rgba(0,0,0,0.10);
+  --border2:rgba(0,0,0,0.18);
+  --blue:#185FA5;
+  --green:#3B6D11;
+  --amber:#854F0B;
+  --red:#A32D2D;
+  --radius:10px;
+  --radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#16161200;
+    --bg2:#1e1e1a;
+    --bg3:#252521;
+    --text:#f0efe8;
+    --text2:#9a9a90;
+    --text3:#6b6b62;
+    --border:rgba(255,255,255,0.09);
+    --border2:rgba(255,255,255,0.18);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── HERO ── */
+.hero{background:var(--text);color:var(--bg);padding:4rem 2rem 3.5rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,0.015) 40px,rgba(255,255,255,0.015) 41px)}
+.hero-inner{max-width:900px;margin:0 auto;position:relative}
+.hero-eyebrow{font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;opacity:0.5;margin-bottom:1rem}
+.hero-title{font-family:'DM Serif Display',serif;font-size:clamp(32px,5vw,52px);line-height:1.1;margin-bottom:1.25rem;letter-spacing:-1px}
+.hero-title em{font-style:italic;opacity:0.7}
+.hero-desc{font-size:16px;line-height:1.7;opacity:0.75;max-width:620px;font-weight:300}
+
+/* ── LOGIC SECTION ── */
+.logic{background:var(--bg2);border-bottom:1px solid var(--border)}
+.logic-inner{max-width:900px;margin:0 auto;padding:3rem 2rem}
+.logic-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;margin-top:2rem}
+.logic-card{border-left:3px solid var(--border2);padding-left:1.25rem}
+.logic-card-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:6px;letter-spacing:1px}
+.logic-card-title{font-size:15px;font-weight:500;margin-bottom:6px}
+.logic-card-body{font-size:13px;line-height:1.65;color:var(--text2)}
+.section-label{font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:0.5rem}
+.section-title{font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:0.75rem;letter-spacing:-0.5px}
+.section-body{font-size:14px;line-height:1.7;color:var(--text2);max-width:680px}
+
+/* ── ASSUMPTIONS ── */
+.assumptions{background:var(--bg3);border-bottom:1px solid var(--border)}
+.assumptions-inner{max-width:900px;margin:0 auto;padding:2.5rem 2rem}
+.assume-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:1.5rem}
+.assume-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem}
+.assume-name{font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.assume-row{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;padding:3px 0;border-top:0.5px solid var(--border)}
+.assume-row:first-of-type{border-top:none}
+.assume-row span:last-child{font-family:'DM Mono',monospace;font-weight:500;font-size:12px}
+.assume-accent{width:3px;height:100%;border-radius:2px;float:left;margin-right:10px}
+
+/* ── CALCULATOR ── */
+.calc-section{max-width:900px;margin:0 auto;padding:2.5rem 2rem 4rem}
+.slabel{font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:1.25rem 0 0.6rem}
+.slabel:first-child{margin-top:0}
+.card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:12px;color:var(--text2)}
+.frow{display:flex;align-items:center;gap:8px}
+.frow input[type=range]{flex:1;accent-color:var(--blue)}
+.nb{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;width:72px;text-align:right;background:var(--bg3);border:0.5px solid var(--border);border-radius:6px;padding:3px 8px;color:var(--text)}
+.hint{font-size:11px;color:var(--text3);margin-top:1px}
+.hint.live{color:var(--blue);font-weight:500}
+.strat-preview{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:0.75rem}
+.sp{border-radius:var(--radius);padding:0.9rem 1rem;border:0.5px solid var(--border);background:var(--bg3)}
+.sp-name{font-size:12px;font-weight:500;margin-bottom:6px}
+.sp-bar{height:5px;border-radius:3px;overflow:hidden;display:flex;margin:5px 0 6px}
+.sp-seg{height:100%}
+.sp-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;color:var(--text2)}
+.sp-row span:last-child{font-family:'DM Mono',monospace;font-weight:500;color:var(--text);font-size:11px}
+.runbtn{margin-top:1.25rem;width:100%;padding:12px;border-radius:var(--radius);background:var(--text);color:var(--bg);font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;border:none;cursor:pointer;letter-spacing:0.3px;transition:opacity 0.15s}
+.runbtn:hover{opacity:0.82}.runbtn:active{opacity:0.65}
+.divider{height:0.5px;background:var(--border);margin:2rem 0}
+.prog-wrap{display:none;margin-top:0.75rem}
+.prog-label{font-size:12px;color:var(--text2);margin-bottom:5px}
+.prog-bar{height:4px;border-radius:3px;background:var(--bg3);overflow:hidden}
+.prog-fill{height:100%;background:var(--blue);border-radius:3px;width:0%;transition:width 0.1s}
+.results3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:0.75rem}
+.rc{border-radius:var(--radius-lg);padding:1.1rem;border:0.5px solid var(--border);background:var(--bg3)}
+.rc.best{background:var(--bg2);border:2px solid #BA7517}
+.rc-tag{font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.rc.best .rc-tag{color:#854F0B}
+.rc-name{font-size:14px;font-weight:500;margin-bottom:3px}
+.rc-moic{font-family:'DM Serif Display',serif;font-size:34px;margin-bottom:2px;letter-spacing:-1px}
+.rc-sub{font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.5}
+.rc-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-top:0.5px solid var(--border)}
+.rc-row span:last-child{font-family:'DM Mono',monospace;font-weight:500}
+.prob-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.prob-lbl{font-size:11px;color:var(--text2);width:28px;flex-shrink:0;font-family:'DM Mono',monospace}
+.prob-track{flex:1;height:5px;background:rgba(128,128,128,0.12);border-radius:3px;overflow:hidden}
+.prob-fill-bar{height:100%;border-radius:3px}
+.prob-val{font-size:11px;font-family:'DM Mono',monospace;font-weight:500;width:34px;text-align:right}
+.sc-section{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin:8px 0 4px;padding-top:8px;border-top:0.5px solid var(--border)}
+.sc-dot{display:inline-block;width:6px;height:6px;border-radius:1px;margin-right:4px;vertical-align:middle}
+.chart-wrap{position:relative;width:100%;height:220px;margin-top:0.75rem}
+.legend{display:flex;gap:16px;font-size:11px;color:var(--text2);margin-bottom:6px;flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:5px}
+.lsq{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.tbl-wrap{overflow-x:auto}
+table.ctbl{width:100%;border-collapse:collapse;font-size:12px}
+table.ctbl th{font-size:10px;font-weight:500;color:var(--text3);padding:7px 10px;border-bottom:0.5px solid var(--border);text-align:center;letter-spacing:.5px}
+table.ctbl th:first-child{text-align:left}
+table.ctbl td{padding:7px 10px;border-bottom:0.5px solid var(--border);text-align:center;font-family:'DM Mono',monospace;font-size:11px}
+table.ctbl td:first-child{text-align:left;font-family:'DM Sans',sans-serif;color:var(--text2);font-size:11px}
+table.ctbl tr:last-child td{border-bottom:none}
+table.ctbl .best{color:#3B6D11;font-weight:600}
+table.ctbl .sc-hdr td{background:var(--bg3);font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;padding:5px 10px;font-family:'DM Sans',sans-serif}
+.insight{font-size:13px;line-height:1.75;color:var(--text2);padding:1.1rem 1.25rem;background:var(--bg3);border-radius:var(--radius);margin-top:1rem;border:0.5px solid var(--border)}
+.insight strong{color:var(--text)}
+
+/* follow-on mechanics box */
+.fo-mechanics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px}
+.fo-box{font-size:11px;line-height:1.6;color:var(--text2);padding:8px 10px;background:var(--bg3);border-radius:8px;border:0.5px solid var(--border)}
+.fo-box strong{display:block;margin-bottom:2px}
+
+@media(max-width:680px){
+  .logic-grid,.assume-grid,.strat-preview,.results3,.g2,.g3,.fo-mechanics{grid-template-columns:1fr}
+  .hero{padding:2.5rem 1.25rem 2rem}
+  .logic-inner,.assumptions-inner,.calc-section{padding:2rem 1.25rem}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Portfolio strategy · Monte Carlo model</div>
+    <h1 class="hero-title">Scout &amp; convert<br><em>vs</em> pure core</h1>
+    <p class="hero-desc">An early-stage fund has a fundamental choice: write large checks upfront into a concentrated portfolio, or write many small checks and convert the winners into core-sized positions. This model stress-tests both strategies — and everything in between — using Monte Carlo simulation with power-law exit distributions. Management fees are modeled explicitly: committed capital minus fees equals the investable amount all strategies deploy.</p>
+  </div>
+</div>
+
+<!-- LOGIC -->
+<div class="logic">
+  <div class="logic-inner">
+    <div class="section-label">How it works</div>
+    <div class="section-title">Three strategies, one fund</div>
+    <p class="section-body">All three strategies deploy the same $105M. The question is whether information advantage (scouting small, then doubling down on winners) can outperform upfront ownership concentration.</p>
+    <div class="logic-grid">
+      <div class="logic-card" style="border-color:#185FA5">
+        <div class="logic-card-num">Strategy A</div>
+        <div class="logic-card-title">Pure core</div>
+        <div class="logic-card-body">All capital deployed into core-sized checks at a single entry valuation. Maximum ownership per dollar from day one. No scouting, no reserve — just concentrated bets upfront.</div>
+      </div>
+      <div class="logic-card" style="border-color:#378ADD">
+        <div class="logic-card-num">Strategy B</div>
+        <div class="logic-card-title">Mixed portfolio</div>
+        <div class="logic-card-body">12 core checks plus small checks filling the remaining budget, with a $40M reserve for pro-rata follow-ons into winners across both buckets.</div>
+      </div>
+      <div class="logic-card" style="border-color:#BA7517">
+        <div class="logic-card-num">Strategy C</div>
+        <div class="logic-card-title">Scout + convert</div>
+        <div class="logic-card-body">Many small checks at lower valuations. Companies that raise a next round are identified as winners — reserve is deployed to top them up to a full core-sized position at that new valuation.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ASSUMPTIONS -->
+<div class="assumptions">
+  <div class="assumptions-inner">
+    <div class="section-label">Model assumptions</div>
+    <div class="section-title">What drives the simulation</div>
+    <p class="section-body">Each simulation draws exit multiples from a log-normal (power law) distribution — a few huge winners, most companies return nothing. Exit probability varies by scenario. The investable amount (committed capital minus management fees) is what all three strategies deploy.</p>
+
+    <div class="assume-grid">
+      <div class="assume-card">
+        <div class="assume-name">Exit model</div>
+        <div class="assume-row"><span>Distribution</span><span>Log-normal (power law)</span></div>
+        <div class="assume-row"><span>Bear exit rate</span><span>10% core / 5% small</span></div>
+        <div class="assume-row"><span>Base exit rate</span><span>20% core / 10% small</span></div>
+        <div class="assume-row"><span>Bull exit rate</span><span>40% core / 15% small</span></div>
+        <div class="assume-row"><span>Simulations</span><span>2,000 per strategy</span></div>
+      </div>
+      <div class="assume-card">
+        <div class="assume-name">Ownership model</div>
+        <div class="assume-row"><span>Core entry val</span><span>$25M (default)</span></div>
+        <div class="assume-row"><span>Small entry val</span><span>$10M (default)</span></div>
+        <div class="assume-row"><span>Core dilution</span><span>35% before exit</span></div>
+        <div class="assume-row"><span>Small dilution</span><span>50% before exit</span></div>
+        <div class="assume-row"><span>Ownership</span><span>check ÷ valuation</span></div>
+      </div>
+      <div class="assume-card">
+        <div class="assume-name">Scout mechanics</div>
+        <div class="assume-row"><span>Signal</span><span>Company raises next round</span></div>
+        <div class="assume-row"><span>Follow-on val</span><span>$25M (default)</span></div>
+        <div class="assume-row"><span>Top-up size</span><span>core check − small check</span></div>
+        <div class="assume-row"><span>Non-raisers</span><span>No follow-on deployed</span></div>
+        <div class="assume-row"><span>Winners that fail</span><span>Both tranches written off</span></div>
+      </div>
+    </div>
+
+    <div style="margin-top:1.25rem;padding:1rem 1.1rem;background:var(--bg2);border-radius:var(--radius);border:0.5px solid var(--border);font-size:13px;line-height:1.7;color:var(--text2)">
+      <strong style="color:var(--text)">Key insight behind the scout strategy:</strong> small checks enter at $10M valuations (buying ~10% ownership for $1M), while core checks enter at $25M (buying ~16% for $4M). When a scout company raises at $25M, the fund deploys the remaining capital to bring total invested to core-check size — but now owning <em>both</em> the initial seed stake and the new stake, at a cost that reflects real information rather than a blind upfront bet.
+    </div>
+  </div>
+</div>
+
+<!-- CALCULATOR -->
+<div class="calc-section">
+  <div class="slabel">Fund economics</div>
+  <div class="card">
+    <div class="g3">
+      <div class="field">
+        <label>Fund size — committed capital ($M)</label>
+        <div class="frow"><input type="range" id="fundSize" min="10" max="500" step="5" value="125"><input type="number" class="nb" id="fundSizeN" value="125"></div>
+        <div class="hint">Total LP commitments raised</div>
+      </div>
+      <div class="field">
+        <label>Management fee % (annual)</label>
+        <div class="frow"><input type="range" id="mgmtFee" min="0" max="4" step="0.1" value="2"><input type="number" class="nb" id="mgmtFeeN" value="2"></div>
+        <div class="hint" id="feeHint">2% × 10 yrs = 20% of fund</div>
+      </div>
+      <div class="field">
+        <label>Fund life (years)</label>
+        <div class="frow"><input type="range" id="fundLife" min="5" max="15" step="1" value="10"><input type="number" class="nb" id="fundLifeN" value="10"></div>
+        <div class="hint">Typical: 10 years</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid var(--border)">
+      <div style="height:10px;border-radius:5px;overflow:hidden;display:flex;background:var(--bg3);margin-bottom:6px">
+        <div id="investSeg" style="height:100%;background:#185FA5;transition:width 0.2s;width:80%"></div>
+        <div id="feeSeg" style="height:100%;background:#E24B4A;opacity:0.7;transition:width 0.2s;width:20%"></div>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px">
+        <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)"><span style="width:7px;height:7px;border-radius:2px;background:#185FA5;flex-shrink:0;display:inline-block"></span><span id="investLbl">Investable: $100M (80%)</span></span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)"><span style="width:7px;height:7px;border-radius:2px;background:#E24B4A;opacity:0.7;flex-shrink:0;display:inline-block"></span><span id="feeLbl">Mgmt fees: $25M (20%)</span></span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-size:12px;color:var(--text2)">Investable capital:</span>
+        <span style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500" id="investableDisplay">$100M</span>
+        <span style="font-size:12px;color:var(--text2)" id="investablePct">(80% of fund)</span>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">All portfolio construction parameters — checks + reserves — should add up to this investable amount.</div>
+    </div>
+  </div>
+
+  <div class="slabel">Shared assumptions</div>
+  <div class="card">
+    <div class="g3">
+      <div class="field">
+        <label>Core check size ($M)</label>
+        <div class="frow"><input type="range" id="cS" min="0.5" max="15" step="0.5" value="4"><input type="number" class="nb" id="cSN" value="4"></div>
+      </div>
+      <div class="field">
+        <label>Core entry valuation ($M)</label>
+        <div class="frow"><input type="range" id="cVal" min="5" max="100" step="1" value="25"><input type="number" class="nb" id="cValN" value="25"></div>
+        <div class="hint live" id="cOwnHint">Ownership: 16.0%</div>
+      </div>
+      <div class="field">
+        <label>Core dilution % before exit</label>
+        <div class="frow"><input type="range" id="cDil" min="0" max="60" step="1" value="35"><input type="number" class="nb" id="cDilN" value="35"></div>
+        <div class="hint" id="cExitOwnHint">Exit ownership: 10.4%</div>
+      </div>
+    </div>
+    <div class="g3" style="margin-top:12px">
+      <div class="field">
+        <label>Small check size ($M)</label>
+        <div class="frow"><input type="range" id="sS" min="0.1" max="5" step="0.1" value="1"><input type="number" class="nb" id="sSN" value="1"></div>
+      </div>
+      <div class="field">
+        <label>Small entry valuation ($M)</label>
+        <div class="frow"><input type="range" id="sVal" min="2" max="50" step="1" value="10"><input type="number" class="nb" id="sValN" value="10"></div>
+        <div class="hint live" id="sOwnHint">Ownership: 10.0%</div>
+      </div>
+      <div class="field">
+        <label>Small dilution % before exit</label>
+        <div class="frow"><input type="range" id="sDil" min="0" max="60" step="1" value="50"><input type="number" class="nb" id="sDilN" value="50"></div>
+        <div class="hint" id="sExitOwnHint">Exit ownership: 5.0%</div>
+      </div>
+    </div>
+    <div class="g3" style="margin-top:12px">
+      <div class="field">
+        <label>Core median exit multiple</label>
+        <div class="frow"><input type="range" id="cMed" min="2" max="100" step="1" value="20"><input type="number" class="nb" id="cMedN" value="20"></div>
+        <div class="hint" id="cExitValHint">Median exit: $500M</div>
+      </div>
+      <div class="field">
+        <label>Small median exit multiple</label>
+        <div class="frow"><input type="range" id="sMed" min="2" max="100" step="1" value="30"><input type="number" class="nb" id="sMedN" value="30"></div>
+        <div class="hint" id="sExitValHint">Median exit: $300M</div>
+      </div>
+      <div class="field">
+        <label>Tail width σ &nbsp;(core / small)</label>
+        <div style="display:flex;gap:8px;margin-top:3px;align-items:center">
+          <input type="number" class="nb" id="cSig" value="1.2" style="flex:1">
+          <span style="font-size:12px;color:var(--text3)">/</span>
+          <input type="number" class="nb" id="sSig" value="1.4" style="flex:1">
+        </div>
+        <div class="hint">Higher = fatter tail, more outliers</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slabel">Scout strategy — follow-on parameters</div>
+  <div class="card">
+    <div class="g3">
+      <div class="field">
+        <label>Follow-on valuation ($M) — when winners raise</label>
+        <div class="frow"><input type="range" id="foVal" min="10" max="100" step="1" value="25"><input type="number" class="nb" id="foValN" value="25"></div>
+        <div class="hint" id="foOwnHint">+16.0% ownership at follow-on</div>
+      </div>
+      <div class="field">
+        <label>% of small checks that raise next round</label>
+        <div class="frow"><input type="range" id="foRate" min="5" max="60" step="5" value="25"><input type="number" class="nb" id="foRateN" value="25"></div>
+        <div class="hint" id="foRateHint">25% show traction signal</div>
+      </div>
+      <div class="field">
+        <label>Of those that raise — % that eventually exit</label>
+        <div class="frow"><input type="range" id="foExitRate" min="10" max="90" step="5" value="50"><input type="number" class="nb" id="foExitRateN" value="50"></div>
+        <div class="hint">Signal quality / conviction accuracy</div>
+      </div>
+    </div>
+    <div class="fo-mechanics">
+      <div class="fo-box"><strong style="color:#3B6D11">Raises next round</strong>Reserve deployed — top up to core size at follow-on valuation</div>
+      <div class="fo-box"><strong style="color:var(--text3)">Doesn't raise</strong>No follow-on. Reserve stays in fund. Initial check written off.</div>
+      <div class="fo-box"><strong style="color:#A32D2D">Raises but doesn't exit</strong>Both tranches (initial + follow-on) written off at $0</div>
+    </div>
+  </div>
+
+  <div class="slabel">Strategy preview — how each deploys $105M</div>
+  <div class="strat-preview" id="stratPreview"></div>
+
+  <button class="runbtn" id="runBtn">Run 2,000 simulations per strategy</button>
+
+  <div class="prog-wrap" id="progWrap">
+    <div class="prog-label" id="progLabel">Running simulations...</div>
+    <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+  </div>
+
+  <div id="out" style="display:none">
+    <div class="divider"></div>
+    <div class="slabel">Base case results — 2,000 simulations each</div>
+    <div class="results3" id="results3"></div>
+
+    <div class="slabel" style="margin-top:1.5rem">MOIC distribution — base case (20% core / 10% small exit rate)</div>
+    <div class="card">
+      <div class="legend" id="chartLegend"></div>
+      <div class="chart-wrap"><canvas id="cmpChart"></canvas></div>
+    </div>
+
+    <div class="slabel" style="margin-top:1.5rem">Full scenario breakdown</div>
+    <div class="card"><div class="tbl-wrap"><table class="ctbl" id="ctbl"></table></div></div>
+
+    <div class="insight" id="insightBox"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const SCS=[{label:'Bear',cP:.10,sP:.05,col:'#E24B4A'},{label:'Base',cP:.20,sP:.10,col:'#378ADD'},{label:'Bull',cP:.40,sP:.15,col:'#639922'}];
+const gv=id=>parseFloat(document.getElementById(id).value)||0;
+const fmt=v=>v>=1000?'$'+(v/1000).toFixed(1)+'B':'$'+v.toFixed(1)+'M';
+const fX=v=>v.toFixed(2)+'x';
+const getPct=(a,p)=>a[Math.floor(p/100*(a.length-1))];
+const pAbove=(a,v)=>Math.round(a.filter(x=>x>=v).length/a.length*100);
+
+// Investable = committed capital minus total management fees
+function getFUND(){
+  const fund=gv('fundSize'),fee=gv('mgmtFee'),life=gv('fundLife');
+  return Math.max(1,fund-fund*fee/100*life);
+}
+
+const sliders=[['fundSize','fundSizeN'],['mgmtFee','mgmtFeeN'],['fundLife','fundLifeN'],['cS','cSN'],['cVal','cValN'],['cDil','cDilN'],['sS','sSN'],['sVal','sValN'],['sDil','sDilN'],['cMed','cMedN'],['sMed','sMedN'],['foVal','foValN'],['foRate','foRateN'],['foExitRate','foExitRateN']];
+sliders.forEach(([r,n])=>{
+  const re=document.getElementById(r),ne=document.getElementById(n);
+  if(!re||!ne) return;
+  re.addEventListener('input',e=>{ne.value=e.target.value;updateHints();});
+  ne.addEventListener('input',e=>{re.value=e.target.value;updateHints();});
+});
+
+function updateFundBar(){
+  const fund=gv('fundSize'),fee=gv('mgmtFee'),life=gv('fundLife');
+  const totalFees=fund*fee/100*life;
+  const investable=Math.max(0,fund-totalFees);
+  const investPct=investable/fund*100,feePct=totalFees/fund*100;
+  document.getElementById('feeHint').textContent=`${fee}% × ${life} yrs = ${(fee*life).toFixed(0)}% of fund`;
+  document.getElementById('investSeg').style.width=investPct+'%';
+  document.getElementById('feeSeg').style.width=feePct+'%';
+  document.getElementById('investLbl').textContent=`Investable: ${fmt(investable)} (${investPct.toFixed(0)}%)`;
+  document.getElementById('feeLbl').textContent=`Mgmt fees: ${fmt(totalFees)} (${feePct.toFixed(0)}%)`;
+  document.getElementById('investableDisplay').textContent=fmt(investable);
+  document.getElementById('investablePct').textContent=`(${investPct.toFixed(0)}% of ${fmt(fund)} fund)`;
+}
+
+function updateHints(){
+  updateFundBar();
+  const FUND=getFUND();
+  const cS=gv('cS'),cVal=gv('cVal'),cDil=gv('cDil'),cMed=gv('cMed');
+  const sS=gv('sS'),sVal=gv('sVal'),sDil=gv('sDil'),sMed=gv('sMed');
+  const foVal=gv('foVal'),foRate=gv('foRate');
+  const cOwn=cS/cVal*100, sOwn=sS/sVal*100;
+  document.getElementById('cOwnHint').textContent='Ownership: '+cOwn.toFixed(1)+'%';
+  document.getElementById('sOwnHint').textContent='Ownership: '+sOwn.toFixed(1)+'%';
+  document.getElementById('cExitOwnHint').textContent='Exit ownership: '+(cOwn*(1-cDil/100)).toFixed(1)+'%';
+  document.getElementById('sExitOwnHint').textContent='Exit ownership: '+(sOwn*(1-sDil/100)).toFixed(1)+'%';
+  document.getElementById('cExitValHint').textContent='Median exit: '+fmt(cVal*cMed);
+  document.getElementById('sExitValHint').textContent='Median exit: '+fmt(sVal*sMed);
+  document.getElementById('foOwnHint').textContent='+'+(cS/foVal*100).toFixed(1)+'% ownership at follow-on';
+  document.getElementById('foRateHint').textContent=foRate+'% show traction signal';
+
+  const topUp=Math.max(0,cS-sS);
+  const scoutSN=Math.floor(FUND/(sS+foRate/100*topUp));
+  const scoutInitial=scoutSN*sS, scoutRes=FUND-scoutInitial;
+  const expectedFO=Math.round(scoutSN*foRate/100);
+  const mixedSN=Math.max(0,Math.round((FUND-40-12*cS)/sS));
+  const cN_pure=Math.floor(FUND/cS);
+
+  document.getElementById('stratPreview').innerHTML=[
+    {name:'A · Pure core',col:'#185FA5',bar:[cN_pure*cS,0,0],rows:[
+      ['# checks',`${cN_pure} × ${fmt(cS)}`],
+      ['Entry valuation',fmt(cVal)],
+      ['Ownership per check',cOwn.toFixed(1)+'%'],
+      ['Exit ownership',+(cOwn*(1-cDil/100)).toFixed(1)+'%'],
+    ]},
+    {name:'B · Mixed portfolio',col:'#378ADD',bar:[12*cS,mixedSN*sS,40],rows:[
+      ['Core',`12 × ${fmt(cS)} @ ${fmt(cVal)}`],
+      ['Small',`${mixedSN} × ${fmt(sS)} @ ${fmt(sVal)}`],
+      ['Reserve (pro-rata)','$40M'],
+      ['Core / small ownership',cOwn.toFixed(1)+'% / '+sOwn.toFixed(1)+'%'],
+    ]},
+    {name:'C · Scout + convert',col:'#BA7517',bar:[scoutInitial,0,scoutRes],rows:[
+      ['Small checks',`${scoutSN} × ${fmt(sS)} @ ${fmt(sVal)}`],
+      ['Initial ownership',sOwn.toFixed(1)+'%'],
+      ['Expected conversions',`${expectedFO} @ ${fmt(foVal)}`],
+      ['Top-up per winner',fmt(topUp)+' → total '+fmt(cS)],
+    ]},
+  ].map(s=>`<div class="sp">
+    <div class="sp-name" style="color:${s.col}">${s.name}</div>
+    <div class="sp-bar">
+      <div class="sp-seg" style="width:${s.bar[0]/FUND*100}%;background:#185FA5"></div>
+      <div class="sp-seg" style="width:${s.bar[1]/FUND*100}%;background:#3B6D11"></div>
+      <div class="sp-seg" style="width:${s.bar[2]/FUND*100}%;background:#BA7517"></div>
+      <div class="sp-seg" style="flex:1;background:var(--border)"></div>
+    </div>
+    ${s.rows.map(([l,v])=>`<div class="sp-row"><span>${l}</span><span>${v}</span></div>`).join('')}
+  </div>`).join('');
+}
+
+function bm(){let u;do{u=Math.random();}while(!u);return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*Math.random());}
+function lnS(med,sig){return Math.exp(Math.log(med)+sig*bm());}
+
+function simCore(cP,N){
+  const FUND=getFUND();
+  const cS=gv('cS'),cVal=gv('cVal'),cDil=gv('cDil')/100,cMed=gv('cMed'),cSig=gv('cSig');
+  const cOwn=cS/cVal,cN=Math.floor(FUND/cS);
+  const out=[];
+  for(let i=0;i<N;i++){let t=0;for(let j=0;j<cN;j++){if(Math.random()<cP){t+=cOwn*(1-cDil)*cVal*lnS(cMed,cSig);}}out.push(t/FUND);}
+  return out.sort((a,b)=>a-b);
+}
+
+function simMixed(cP,sP,N){
+  const FUND=getFUND();
+  const cS=gv('cS'),cVal=gv('cVal'),cDil=gv('cDil')/100,cMed=gv('cMed'),cSig=gv('cSig');
+  const sS=gv('sS'),sVal=gv('sVal'),sDil=gv('sDil')/100,sMed=gv('sMed'),sSig=gv('sSig');
+  const mixedCN=12,mixedRes=40,mixedSN=Math.max(0,Math.round((FUND-mixedRes-mixedCN*cS)/sS));
+  const cOwn=cS/cVal,sOwn=sS/sVal;
+  const foC=mixedRes*0.5/Math.max(1,mixedCN*cP),foS=mixedRes*0.5/Math.max(1,mixedSN*sP);
+  const out=[];
+  for(let i=0;i<N;i++){
+    let t=0;
+    for(let j=0;j<mixedCN;j++){if(Math.random()<cP){const ev=cVal*lnS(cMed,cSig);t+=Math.min(cOwn,cOwn*(1-cDil)+foC/(cVal*3))*ev;}else{t+=foC;}}
+    for(let j=0;j<mixedSN;j++){if(Math.random()<sP){const ev=sVal*lnS(sMed,sSig);t+=Math.min(sOwn,sOwn*(1-sDil)+foS/(sVal*3))*ev;}else{t+=foS;}}
+    out.push(t/FUND);
+  }
+  return out.sort((a,b)=>a-b);
+}
+
+function simScout(sP,N){
+  const FUND=getFUND();
+  const cS=gv('cS'),cVal=gv('cVal'),cDil=gv('cDil')/100,cMed=gv('cMed'),cSig=gv('cSig');
+  const sS=gv('sS'),sVal=gv('sVal'),sDil=gv('sDil')/100,sMed=gv('sMed'),sSig=gv('sSig');
+  const foVal=gv('foVal'),foRate=gv('foRate')/100,foExitRate=gv('foExitRate')/100;
+  const topUp=Math.max(0,cS-sS),scoutSN=Math.floor(FUND/(sS+foRate*topUp));
+  const sOwn=sS/sVal,topUpOwn=topUp/foVal,pExitNoRaise=sP*0.15;
+  const out=[];
+  for(let i=0;i<N;i++){
+    let t=0;
+    for(let j=0;j<scoutSN;j++){
+      if(Math.random()<foRate){
+        if(Math.random()<foExitRate){
+          const exitVal=sVal*lnS(cMed,cSig);
+          t+=Math.min(sOwn+topUpOwn,sOwn*(1-sDil)+topUpOwn*(1-sDil*0.5))*exitVal;
+        }
+      } else {
+        if(Math.random()<pExitNoRaise){t+=sOwn*(1-sDil)*sVal*lnS(sMed,sSig);}
+      }
+    }
+    out.push(t/FUND);
+  }
+  return out.sort((a,b)=>a-b);
+}
+
+const STRATS=[
+  {key:'A',name:'Pure core',color:'#185FA5',simFn:(cP,sP,N)=>simCore(cP,N)},
+  {key:'B',name:'Mixed portfolio',color:'#378ADD',simFn:simMixed},
+  {key:'C',name:'Scout + convert',color:'#BA7517',simFn:(cP,sP,N)=>simScout(sP,N)},
+];
+
+let myChart;
+document.getElementById('runBtn').addEventListener('click',async()=>{
+  const FUND=getFUND();
+  const total=STRATS.length*SCS.length;let done=0;
+  document.getElementById('progWrap').style.display='block';
+  document.getElementById('out').style.display='none';
+  document.getElementById('progFill').style.width='0%';
+  const allResults={};
+  for(const st of STRATS){
+    allResults[st.key]={};
+    for(const sc of SCS){
+      allResults[st.key][sc.label]=st.simFn(sc.cP,sc.sP,2000);
+      done++;document.getElementById('progFill').style.width=(done/total*100)+'%';
+      document.getElementById('progLabel').textContent=`Simulating: ${st.name} — ${sc.label} case...`;
+      await new Promise(r=>setTimeout(r,0));
+    }
+  }
+  document.getElementById('progWrap').style.display='none';
+
+  const base='Base';
+  const p50s=STRATS.map(s=>getPct(allResults[s.key][base],50));
+  const bestKey=STRATS[p50s.indexOf(Math.max(...p50s))].key;
+
+  const cS=gv('cS'),cVal=gv('cVal'),sS=gv('sS'),sVal=gv('sVal'),foVal=gv('foVal'),foRate=gv('foRate')/100;
+  const topUp=Math.max(0,cS-sS);
+  const scoutSN=Math.floor(FUND/(sS+foRate*topUp));
+  const mixedSN=Math.max(0,Math.round((FUND-40-12*cS)/sS));
+  const extras={
+    A:`${Math.floor(FUND/cS)} checks · $${cVal}M entry val · ${(cS/cVal*100).toFixed(1)}% ownership`,
+    B:`12 core @ $${cVal}M + ${mixedSN} small @ $${sVal}M + $40M reserve`,
+    C:`${scoutSN} scouts @ $${sVal}M · ${Math.round(scoutSN*foRate)} convert @ $${foVal}M`,
+  };
+
+  document.getElementById('results3').innerHTML=STRATS.map(st=>{
+    const r=allResults[st.key][base],isBest=st.key===bestKey;
+    const p50=getPct(r,50),p90=getPct(r,90),p10=getPct(r,10);
+    return`<div class="rc${isBest?' best':''}">
+      <div class="rc-tag">${isBest?'Best strategy — base case':'Strategy'}</div>
+      <div class="rc-name" style="color:${st.color}">${st.name}</div>
+      <div class="rc-moic">${fX(p50)}</div>
+      <div class="rc-sub">${extras[st.key]}</div>
+      ${[1,2,3].map(x=>{const p=pAbove(r,x);return`<div class="prob-row"><span class="prob-lbl">${x}x</span><div class="prob-track"><div class="prob-fill-bar" style="width:${p}%;background:${st.color}"></div></div><span class="prob-val">${p}%</span></div>`;}).join('')}
+      <div class="rc-row" style="margin-top:4px"><span>P10 MOIC</span><span>${fX(p10)}</span></div>
+      <div class="rc-row"><span>P50 MOIC</span><span>${fX(p50)}</span></div>
+      <div class="rc-row"><span>P90 MOIC</span><span>${fX(p90)}</span></div>
+      <div class="rc-row"><span>P(5x+)</span><span>${pAbove(r,5)}%</span></div>
+      <div class="sc-section">By scenario</div>
+      ${SCS.map(sc=>`<div class="rc-row"><span><span class="sc-dot" style="background:${sc.col}"></span>${sc.label}</span><span>${fX(getPct(allResults[st.key][sc.label],50))}</span></div>`).join('')}
+    </div>`;
+  }).join('');
+
+  const maxM=Math.min(Math.max(...STRATS.map(s=>getPct(allResults[s.key][base],97)))*1.2,30);
+  const BINS=35,bw=Math.max(maxM/BINS,0.01);
+  const xlabels=Array.from({length:BINS},(_,i)=>((i+0.5)*bw).toFixed(1)+'x');
+  const toCounts=arr=>{const c=Array(BINS).fill(0);arr.forEach(v=>{c[Math.min(BINS-1,Math.floor(v/bw))]++;});return c;};
+  document.getElementById('chartLegend').innerHTML=STRATS.map(s=>`<span><div class="lsq" style="background:${s.color}"></div>${s.name}</span>`).join('');
+  if(myChart) myChart.destroy();
+  myChart=new Chart(document.getElementById('cmpChart'),{
+    type:'line',
+    data:{labels:xlabels,datasets:STRATS.map(s=>({data:toCounts(allResults[s.key][base]),borderColor:s.color,backgroundColor:s.color+'18',fill:true,tension:0.45,borderWidth:2,pointRadius:0}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{maxTicksLimit:10,font:{size:10}},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:10}},grid:{color:'rgba(128,128,128,0.08)'},border:{display:false}}}}
+  });
+
+  let tbl=`<tr><th>Metric</th>${STRATS.map(s=>`<th style="color:${s.color}">${s.name}</th>`).join('')}</tr>`;
+  SCS.forEach(sc=>{
+    tbl+=`<tr class="sc-hdr"><td colspan="4"><span class="sc-dot" style="background:${sc.col};display:inline-block;width:6px;height:6px;border-radius:1px;margin-right:5px;vertical-align:middle"></span>${sc.label} case — core ${Math.round(sc.cP*100)}% exit / small ${Math.round(sc.sP*100)}% exit</td></tr>`;
+    [['P50 MOIC',r=>fX(getPct(r,50))],['P90 MOIC',r=>fX(getPct(r,90))],['P(1x)',r=>pAbove(r,1)+'%'],['P(2x)',r=>pAbove(r,2)+'%'],['P(3x)',r=>pAbove(r,3)+'%']].forEach(([lbl,fn])=>{
+      const rawVals=STRATS.map(s=>{const r=allResults[s.key][sc.label];return lbl.startsWith('P(')?pAbove(r,parseInt(lbl[2])):getPct(r,parseInt(lbl[1]));});
+      const best=Math.max(...rawVals);
+      tbl+=`<tr><td>${lbl}</td>${STRATS.map((s,i)=>`<td class="${rawVals[i]===best?'best':''}">${fn(allResults[s.key][sc.label])}</td>`).join('')}</tr>`;
+    });
+  });
+  document.getElementById('ctbl').innerHTML=tbl;
+
+  const winner=STRATS.find(s=>s.key===bestKey);
+  const delta=p50s[2]-p50s[0];
+  document.getElementById('insightBox').innerHTML=`<strong>Reading the results:</strong> each bar in the distribution chart represents how often that MOIC outcome occurred across 2,000 simulations. A curve shifted right = better outcomes on average. A wider, fatter curve = more variance (higher upside <em>and</em> higher downside). <strong>${winner.name} wins the base case</strong> with a median MOIC of ${fX(Math.max(...p50s))}. The scout strategy ${delta>0?`outperforms pure core by <strong>+${delta.toFixed(2)}x</strong> — entering early at lower valuations, then concentrating into proven winners, generates better risk-adjusted returns. The key driver: small checks at $${sVal}M buy ${(sS/sVal*100).toFixed(1)}% for $${sS}M, while the follow-on at $${foVal}M converts the best ones into full core positions with real information advantage.`:`trails pure core by ${Math.abs(delta).toFixed(2)}x with current assumptions. Adjust the follow-on valuation downward, increase % that eventually exit, or lower the small entry valuation to find the crossover point where scout becomes the better strategy.`}`;
+
+  document.getElementById('out').style.display='block';
+});
+
+updateHints();
+</script>
+</body>
+</html>
